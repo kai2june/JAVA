@@ -1,0 +1,409 @@
+package apjp2017.hw1;
+
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
+import apjp2017.hw1.HW12.EightQueenPosition;
+import static apjp2017.hw1.HW12.EightQueenPosition.*;
+
+public class HW12 {
+	
+	
+	public enum EightQueenPosition	{
+		P00, P01, P02, P03, P04, P05, P06, P07,
+		P10, P11, P12, P13, P14, P15, P16, P17,
+		P20, P21, P22, P23, P24, P25, P26, P27,
+		P30, P31, P32, P33, P34, P35, P36, P37,
+		P40, P41, P42, P43, P44, P45, P46, P47,
+		P50, P51, P52, P53, P54, P55, P56, P57,
+		P60, P61, P62, P63, P64, P65, P66, P67,
+		P70, P71, P72, P73, P74, P75, P76, P77;
+	
+	 //Every position is indexed by its row and column value.  
+	 int row, col ;	
+
+	 static { // use static initializer to fill in (row, col) for every literal PXX.
+		
+		EightQueenPosition[] all = EightQueenPosition.values() ;
+		int k = 0 ;
+	   	for(int r =0; r < 8; r++ ){
+	   		for(int c = 0; c < 8; c++){
+	   	      all[k].row = r;
+	   	      all[k].col = c;
+	   	      k++ ;
+	   		}
+	   	}		 
+	 }
+	 
+	 
+	 /** TODO-method:
+	  *  Given a set of board positions, return a string displaying
+	  *  the layout and content of the board.
+	  */
+	 public static String displayQBoard(EnumSet<EightQueenPosition> queens) {
+		 // replace following code with your implementation
+		 int[] r =new int[8];
+		 int[] c =new int[8];
+		 int index=0;
+		 
+		 for(EightQueenPosition p : queens){
+			 r[index]=p.row;
+             c[index]=p.col;
+             index++;
+		 }
+			 
+         int[][] exist = new int[16][16];
+         for(int count_queen=0; count_queen<8; count_queen++){
+        	 exist[ r[count_queen]*2 + 1 ][ c[count_queen]*2 +1 ] = 1;
+         }
+         
+		 String rlt = new String();
+		 for(int i=0; i<17; i++){
+			 StringBuilder tmp = new StringBuilder();
+			 if(i%2==0)
+				 tmp.append("-----------------");
+			 else{
+			     for(int j=0; j<17; j++){
+				     if(j%2==0)
+				    	 tmp.append("|");
+				     else if(exist[i][j]==1)
+				    	 tmp.append("X");
+				     else if(exist[i][j]==0)
+				         tmp.append(" ");
+			     }
+			 }
+			 rlt += tmp + "\n";
+		 }
+		 
+		 return rlt;
+	 }
+		
+		
+	/**TODO-method: 
+	 * Given a set of board positions, determine if it is a solution of the 8-Queen problem.
+	 *  @param board  a set of positions
+	 *  @return true if it is a solution of 8 queens.
+	 */
+	 
+	public static boolean isSolution(EnumSet<EightQueenPosition> queens ){
+		// replace following code with your implementation
+		 
+		int[] r =new int[8];
+		int[] c =new int[8];
+		int[] check_row = new int[8];
+		int[] check_column = new int[8];
+		int index=0;
+		for(EightQueenPosition p : queens){ ////test for same row or same column
+            r[index]=p.row;
+            c[index]=p.col;
+            index++;
+            if(check_row[p.row] != 0)
+                return false;
+            else
+                check_row[p.row]++;
+            if(check_column[p.col] != 0)
+            	return false;
+            else
+                check_column[p.col]++;
+		}
+		
+		for(int i=0; i<8; i++){////test for diagonal 
+			for(int j=0; j<8; j++){
+				if(i==j)// I am same length as me.
+					continue;
+				else{
+				    if( Math.abs(r[j]-r[i]) == Math.abs(c[j]-c[i]) )
+				    	return false;
+				}
+			}
+		}
+		return true;
+		
+	}
+	
+	
+	/** TODO-method: 
+	 * Given a set of board positions, determine if we can get a solution of 8 Queens problem by adding additional positions
+	 *  to the input board. Return any such extension of the input board if it is possible and return an empty set if
+	 *  there is no such solution.  
+	 *  @param  board  a set of positions . 
+	 *  @return all solution boards which are extensions of the inpout board, or Emptyset.none() 
+	 *          if there is no solution.
+	 */
+	 
+	public static Set<EnumSet<EightQueenPosition>> getAllSolutions(EnumSet<EightQueenPosition> queens ){
+		// replace following code with your implementation
+		if(queens.size()==0)
+			return new HashSet<>();
+		
+		int[][] table = new int[92][8];
+		enumerate(8, table); ////checked, values have already been stored in table[0]~table[92]
+
+        EightQueenPosition[] position = EightQueenPosition.values();
+        int k=0;
+        for(int i=0; i<8; i++){
+            for(int j=0; j<8; j++){
+        		position[k].row = i;
+        		position[k].col = j;
+        		k++;
+        	}
+        }
+        
+        int match=0;
+		Set<EnumSet<EightQueenPosition>> qSet = new HashSet<>();
+		EnumSet<EightQueenPosition> rlt = EnumSet.noneOf(EightQueenPosition.class);
+		for(int count=0; count<table_count; count++){//// Prerequisite: make sure that queens is sorted.
+			match=0;
+			for(EightQueenPosition p : queens){
+			    if( table[count][p.row] == p.col)
+			    	match++;
+			}
+			if(match==queens.size()){
+				rlt = rlt.noneOf(EightQueenPosition.class);
+                for(int s=0; s<8; s++){
+                	for(EightQueenPosition t : position){
+                		if( (s == t.row) && (table[count][s] == t.col) )
+                			rlt.add(t);
+                	}
+                }
+                qSet.add(rlt);
+			}
+		}
+        
+		return qSet;
+	}
+	
+	////////////////////////////////////////////////////////////
+	////// Add any additional methods/fields  from here      ///
+	///////////////////////////////////////////////////////////
+	private static int table_count = 0;
+	
+	public static void enumerate(int n, int[][] table){
+    	int[] q = new int[n];
+    	enumerate(q, 0, table);
+    }
+    public static void enumerate(int[] q, int k, int[][] table){
+    	int n = q.length;
+    	if(k==n)
+    		printQueens(q, table);
+    	else{
+    		for(int i=0; i<n; i++){
+    			q[k]=i;
+    			if(isConsistent(q, k))
+    				enumerate(q, k+1, table);
+    		}
+    	}
+    }
+    public static boolean isConsistent(int[] q, int k){
+    	for(int i=0; i<k; i++){
+    		if( q[i] == q[k] )
+    			return false;
+    		if( Math.abs(q[i]-q[k]) == Math.abs(i-k) )
+    			return false;
+    	}
+    	return true;
+    }
+	public static void printQueens(int[] q, int[][] table){
+    	int n = q.length;
+    	for(int i=0; i<n; i++){
+    		for(int j=0; j<n; j++){
+    			if(q[i] == j)
+    				table[ table_count ][i]=j;
+    		}
+    	}
+    	table_count++;
+    }
+
+	
+			
+	}
+
+	
+	
+	static int nTests = 0;   // each test may produce multiple errors!
+	static int nErrors = 0;
+	static int nTestErrors = 0;
+	static boolean newTest = true;
+
+	static void error() {
+		error("");
+	}
+
+	static void error(String s) {
+		nErrors++;
+		if(newTest){
+			nTestErrors ++ ;
+			newTest = false;
+			System.out.println(">>> new TestError! <<< ");
+		}
+		System.out.println("*** error " + nErrors + "*** :\n" + s);
+	}
+	
+	static void error(String s, Object ... args){
+		error( String.format(s, args));
+	}
+
+	static void test() {
+		nTests++;
+		newTest = true ;
+	}
+	
+//	static void test(int k) {
+//		nTests += k ;
+//	}
+
+	static String summary() {
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("There are totally " + nTests + " full tests! \n");
+		sb.append("There are " + nTestErrors + " test errors! \n");
+		sb.append("There are " + nErrors + " detailed errors! \n");
+		sb.append(" The passing rate is " + (nTests - nTestErrors) + "/" + nTests + "="
+				+ ((nTests - nTestErrors) * 100 / nTests) + "!\n");
+
+		int score = (nTests - nTestErrors) * 50 / nTests + 50 ;
+
+		sb.append("The score is " + score + " provided your source passes compilation!");
+
+		return sb.toString();
+
+	}
+
+	
+	public static void mainTest(String... args) {
+		
+		HW12 hw12 = new HW12();
+		
+				
+		hw12.testDisplayQBoard();
+		hw12.testIsSolution();
+		hw12.testGetAllSolutions();
+
+	}
+	
+	
+	/**
+	 * 
+	 * @param args
+	 */
+	public void testDisplayQBoard() {
+		// write your test code here!
+		test();
+		EnumSet<EightQueenPosition> qSet = EnumSet.noneOf(EightQueenPosition.class);
+		qSet.add(P03);
+		qSet.add(P16);
+		qSet.add(P22);
+		qSet.add(P37);
+		qSet.add(P41);
+		qSet.add(P54);
+		qSet.add(P60);
+		qSet.add(P75);
+		String rlt = displayQBoard(qSet);
+		
+		String ans = "-----------------\n" + 
+					 "| | | |X| | | | |\n" +
+					 "-----------------\n" +
+					 "| | | | | | |X| |\n" +
+					 "-----------------\n" +
+					 "| | |X| | | | | |\n" +
+					 "-----------------\n" +
+					 "| | | | | | | |X|\n" +
+					 "-----------------\n" +
+					 "| |X| | | | | | |\n" +
+					 "-----------------\n" +
+					 "| | | | |X| | | |\n" +
+					 "-----------------\n" +
+					 "|X| | | | | | | |\n" +
+					 "-----------------\n" +
+					 "| | | | | |X| | |\n" +
+					 "-----------------\n" ;
+		
+        if(!rlt.equals(ans))
+        	error( "Your answer:\n" + rlt + "Official answer:\n" + rlt);
+	}
+
+	/**
+	 * 
+	 * @param args
+	 */
+	public void testIsSolution() {
+		// write your test code here!
+		test();
+		EnumSet<EightQueenPosition> qSet = EnumSet.noneOf(EightQueenPosition.class);
+		qSet.add(P03);
+		qSet.add(P16);
+		qSet.add(P22);
+		qSet.add(P37);
+		qSet.add(P41);
+		qSet.add(P54);
+		qSet.add(P60);
+		qSet.add(P75);
+		boolean ans = isSolution(qSet);//should be true
+		if(ans==false)
+			error("Result1 should be false.");
+		
+		EnumSet<EightQueenPosition> pSet = EnumSet.noneOf(EightQueenPosition.class);
+		pSet.add(P13);
+		pSet.add(P06);
+		pSet.add(P22);
+		pSet.add(P37);
+		pSet.add(P41);
+		pSet.add(P54);
+		pSet.add(P60);
+		pSet.add(P75);
+		boolean ans2 = isSolution(pSet);//should be false
+		if(ans2==true)
+			error("Result2 should be true.");
+	}
+
+	/**
+	 * 
+	 * @param args
+	 */
+	public void testGetAllSolutions() {
+		// write your test code here!
+		test();
+		Set<EnumSet<EightQueenPosition>> rlt = getAllSolutions(EnumSet.of(P27, P00));
+		//System.out.println(rlt);
+		Set<EnumSet<EightQueenPosition>> ans = new HashSet<>();
+		EnumSet<EightQueenPosition> tmp = EnumSet.noneOf(EightQueenPosition.class);
+		tmp.add(P00);
+		tmp.add(P15);
+		tmp.add(P27);
+		tmp.add(P32);
+		tmp.add(P46);
+		tmp.add(P53);
+		tmp.add(P61);
+		tmp.add(P74);
+        ans.add(tmp);
+        tmp=tmp.noneOf(EightQueenPosition.class);
+        tmp.add(P00);
+        tmp.add(P14);
+        tmp.add(P27);
+        tmp.add(P35);
+        tmp.add(P42);
+        tmp.add(P56);
+        tmp.add(P61);
+        tmp.add(P73);
+        ans.add(tmp);
+		//System.out.println(ans);
+		if( !rlt.equals(ans) )
+		    error("Test getAllSolutions--Your answer:\n"+ rlt + "Official answer:\n"+ ans );
+	}		 
+	 
+	
+	
+	 public static void main(String... args) {
+
+			// write your own test here!
+		 
+			System.out.println("=====Begin of Test======");
+			// test with tests given by the instructor!
+			mainTest(args);
+			System.out.println("=====End of Test=========");
+			System.out.println(summary());
+		}
+	
+	
+
+}
