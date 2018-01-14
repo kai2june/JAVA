@@ -7,8 +7,8 @@ public class Queens {
 	    * other queens q[0] through q[n-1]
 	    ***************************************************************************/
 	    public static boolean isConsistent(int[] q, int k) {
-	        for (int i = 0; i < k; i++) { //// k�N��{�b���b��ĤT���Ai�N��Ĺs���~�ĤG��榳�S����ĤT���Ĭ�
-	            if (q[i] == q[k])         //// i,k�N��row  q[i],q[k]�N��column    
+	        for (int i = 0; i < k; i++) { //// k代表現在正在填第三橫行，i代表第零橫行~第二橫行有沒有跟第三橫行衝突
+	            if (q[i] == q[k])         //// i,k代表row  q[i],q[k]代表column    
 	            	return false;   // same column
 	            
 	            if ( Math.abs(q[i] - q[k]) == Math.abs(k - i) ) 
