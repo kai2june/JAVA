@@ -136,13 +136,13 @@ public class HW41 {
 			    	break;
 			    }
 			}	
-		
+			if(count==10000)
+			    break;
 			if(flag==0){
 				arr[count]=i;
 			    count++;
 			}
-			if(count==10000)
-				break;
+
 		}
 		
 		LongStream rlt = LongStream.of(arr);
