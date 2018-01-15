@@ -284,8 +284,8 @@ public class HW42 {
 			String f_name = (String) in.readObject();
 			this.father = new Man(f_name);
 			
-            String m_name = in.readUTF();
-            this.mother = new Woman(m_name);
+            		String m_name = in.readUTF();
+           		this.mother = new Woman(m_name);
 
 			String myName;
 			String myGender;
